@@ -12,6 +12,7 @@ class _MonthlyChallengePageState extends State<MonthlyChallengePage> {
   double cash = 1200; // starting cash
   double debt = 0; // starting debt
   String outcome = '';
+  int points = 0;
 
   final List<_StoryStep> steps = [
     _StoryStep(
@@ -76,6 +77,7 @@ class _MonthlyChallengePageState extends State<MonthlyChallengePage> {
       } else {
         final netWorth = cash - debt;
         outcome = _classifyOutcome(netWorth);
+        points = _pointsForNetWorth(netWorth);
       }
     });
   }
@@ -86,6 +88,14 @@ class _MonthlyChallengePageState extends State<MonthlyChallengePage> {
     if (netWorth >= 0) return 'Balanced: you made it through the month, keep pushing!';
     if (netWorth >= -300) return 'Strained: some debt pressure. Revisit spending.';
     return 'Poor: heavy liabilities. Build an emergency fund and cut costs.';
+  }
+
+  int _pointsForNetWorth(double netWorth) {
+    if (netWorth >= 2000) return 120;
+    if (netWorth >= 1000) return 80;
+    if (netWorth >= 0) return 50;
+    if (netWorth >= -300) return 20;
+    return 5;
   }
 
   @override
@@ -272,6 +282,18 @@ class _MonthlyChallengePageState extends State<MonthlyChallengePage> {
             Text('Outcome', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
             SizedBox(height: 8),
             Text(outcome, style: TextStyle(color: Colors.white70), textAlign: TextAlign.center),
+            SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.stars, color: accent),
+                SizedBox(width: 8),
+                Text(
+                  'Points: $points',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
             SizedBox(height: 16),
             Wrap(
               spacing: 10,

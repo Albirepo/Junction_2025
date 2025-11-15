@@ -7,6 +7,7 @@ class AvatarWidget extends StatelessWidget {
   final int points;
   final int rank;
   final int streak;
+  final Color borderColor;
 
   const AvatarWidget({
     Key? key,
@@ -15,6 +16,7 @@ class AvatarWidget extends StatelessWidget {
     this.points = 7520,
     this.rank = 1,
     this.streak = 12,
+    this.borderColor = const Color(0xFF3A9C9F), // Match bottom menu accent
   }) : super(key: key);
 
   String _getRankTitle(int rank) {
@@ -53,12 +55,12 @@ class AvatarWidget extends StatelessWidget {
                     ),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: _getRankColor(rank).withOpacity(0.5),
+                      color: borderColor.withOpacity(0.5),
                       width: 2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: _getRankColor(rank).withOpacity(0.3),
+                        color: borderColor.withOpacity(0.3),
                         blurRadius: 20,
                         spreadRadius: 5,
                       ),
@@ -101,7 +103,7 @@ class AvatarWidget extends StatelessWidget {
                               shape: BoxShape.circle,
                               gradient: RadialGradient(
                                 colors: [
-                                  _getRankColor(rank).withOpacity(0.4),
+                                  borderColor.withOpacity(0.4),
                                   Colors.transparent,
                                 ],
                               ),
@@ -114,12 +116,12 @@ class AvatarWidget extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: _getRankColor(rank),
+                                color: borderColor,
                                 width: 3,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _getRankColor(rank).withOpacity(0.5),
+                                  color: borderColor.withOpacity(0.5),
                                   blurRadius: 15,
                                   spreadRadius: 2,
                                 ),
@@ -154,7 +156,7 @@ class AvatarWidget extends StatelessWidget {
                             child: Container(
                               padding: EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: _getRankColor(rank),
+                                color: borderColor,
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: Color(0xFF0D1B2A),
@@ -195,19 +197,19 @@ class AvatarWidget extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              _getRankColor(rank).withOpacity(0.3),
-                              _getRankColor(rank).withOpacity(0.1),
+                              borderColor.withOpacity(0.3),
+                              borderColor.withOpacity(0.1),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: _getRankColor(rank).withOpacity(0.5),
+                            color: borderColor.withOpacity(0.5),
                           ),
                         ),
                         child: Text(
                           _getRankTitle(rank),
                           style: TextStyle(
-                            color: _getRankColor(rank),
+                            color: borderColor,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -370,10 +372,10 @@ class AvatarWidget extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: _getRankColor(rank), width: 2),
+          border: Border.all(color: borderColor, width: 2),
           boxShadow: [
             BoxShadow(
-              color: _getRankColor(rank).withOpacity(0.4),
+              color: borderColor.withOpacity(0.4),
               blurRadius: 8,
               spreadRadius: 1,
             ),

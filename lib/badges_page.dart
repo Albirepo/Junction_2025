@@ -166,24 +166,27 @@ class _BadgesPageState extends State<BadgesPage>
               ),
               child: Row(
                 children: [
+                  // Avatar from monthly challenge
                   Container(
-                    padding: EdgeInsets.all(12),
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [accent, accent.withOpacity(0.7)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(14),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: accent, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: accent.withOpacity(0.4),
+                          color: accent.withOpacity(0.35),
                           blurRadius: 8,
                           offset: Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Icon(Icons.flag, color: Colors.white, size: 28),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/avatar_profile.png',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                   SizedBox(width: 14),
                   Expanded(
@@ -192,15 +195,18 @@ class _BadgesPageState extends State<BadgesPage>
                       children: [
                         Row(
                           children: [
-                            Text(
-                              'New Monthly Challenge',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            Flexible(
+                              child: Text(
+                                'Monthly Challenge',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            SizedBox(width: 6),
+                            SizedBox(width: 8),
                             Container(
                               padding: EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -213,7 +219,7 @@ class _BadgesPageState extends State<BadgesPage>
                               child: Text(
                                 'NEW',
                                 style: TextStyle(
-                                  color: accent,
+                                  color: Color(0xFF0D1B2A),
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -223,12 +229,15 @@ class _BadgesPageState extends State<BadgesPage>
                         ),
                         SizedBox(height: 6),
                         Text(
-                          'Tap to play a quick financial story',
+                          'Help Maya settle in Helsinki with smart money choices',
                           style: TextStyle(color: Colors.white70, fontSize: 13),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
+                  SizedBox(width: 8),
                   Icon(Icons.chevron_right, color: Colors.white70, size: 28),
                 ],
               ),
@@ -431,25 +440,25 @@ class _BadgesPageState extends State<BadgesPage>
                       ],
                     ),
                     child: ClipOval(
-                      child: Image.network(
-                        user['avatar'],
-                        width: 44,
-                        height: 44,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return CircleAvatar(
-                            radius: 22,
-                            backgroundColor: accent.withOpacity(0.3),
-                            child: Text(
-                              user['name'][0],
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
+                    child: Image.asset(
+                      user['avatar'],
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return CircleAvatar(
+                          radius: 22,
+                          backgroundColor: accent.withOpacity(0.3),
+                          child: Text(
+                            user['name'][0],
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
+                    ),
                     ),
                   ),
                   SizedBox(width: 12),
