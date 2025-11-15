@@ -7,7 +7,9 @@ import 'badges_page.dart';
 import 'learning_path_page.dart';
 import 'spending_sandbox_page.dart';
 import 'budget_course_page.dart';
-import 'dart:math'; // For random data in interactive widgets
+import 'dart:math';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 // Global variables (updated theme: blue and orange)
 final Color primaryBlue = Color(0xFF1E88E5);
@@ -27,9 +29,6 @@ class _HomePageState extends State<HomePage> {
 
   void _onItemTapped(int index) {
     setState(() {
-      // If the user taps on the home tab from within the home tab,
-      // it should navigate to the actual HomeContent if it's currently on a sub-page,
-      // but here we only handle BottomNavBar taps, so 0 is HomeContent.
       _selectedIndex = index;
     });
   }
@@ -37,8 +36,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Index mapping: 0: Home, 1: Learn (Groups), 2: Activity (Esports), 3: Expense (Wallet), 4: Badges (Military)
-    // Extra pages (5: Goals) are available for programmatic navigation.
+
     _pages = [
       HomeContent(
         onGoToGoals: () => _onItemTapped(5),
@@ -56,36 +54,32 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF0D1B2A), // Dark background
+      backgroundColor: Color(0xFF0D1B2A),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         color: accentOrange,
         notchMargin: 8,
-        height: 70, // Bottom bar height
+        height: 70,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // Activity Page (Esports)
             IconButton(
               icon: Icon(Icons.sports_esports, color: Colors.white),
               onPressed: () => _onItemTapped(2),
               tooltip: 'Activity',
             ),
-            // Expense Page (Wallet)
             IconButton(
               icon: Icon(Icons.account_balance_wallet, color: Colors.white),
               onPressed: () => _onItemTapped(3),
               tooltip: 'Expense',
             ),
-            SizedBox(width: 50), // Spacer for FAB
-            // Learning Path Page (Groups)
+            SizedBox(width: 50),
             IconButton(
               icon: Icon(Icons.groups, color: Colors.white),
               onPressed: () => _onItemTapped(1),
               tooltip: 'Learn',
             ),
-            // Badges Page (Military)
             IconButton(
               icon: Icon(Icons.military_tech, color: Colors.white),
               onPressed: () => _onItemTapped(4),
@@ -106,7 +100,8 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Separate class for home content: enhanced with interactive elements
+// --------------------------- HOME CONTENT ------------------------------
+
 class HomeContent extends StatefulWidget {
   final VoidCallback? onGoToGoals;
   final VoidCallback? onGoToExpense;
@@ -119,12 +114,14 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  // Demo data for an interactive dashboard feel
   double currentBalance = 12450.00;
   double monthlySpending = 1850.50;
   double spendingLimit = 2500.00;
 
-  // Small saving goals to show top-right with progress bars
+  bool _isLoadingInsights = false;
+  String _insightText =
+      'Your high food spending is impacting your goals. Check out the "Meal Prep 101" course to learn how to cut costs.';
+
   List<Map<String, dynamic>> get savingGoals => [
     {
       'title': 'Gaming PC',
@@ -142,21 +139,21 @@ class _HomeContentState extends State<HomeContent> {
     },
   ];
 
-  // Carousel controller
   final PageController _carouselController = PageController(
-    viewportFraction: 0.92, // Slightly wider for mobile fit
+    viewportFraction: 0.92,
   );
+
   int _carouselIndex = 0;
 
-  // Simulate an update
   void _simulateBalanceUpdate() {
     setState(() {
-      currentBalance +=
-          Random().nextInt(500) - 250; // Add/subtract small random amount
+      currentBalance += Random().nextInt(500) - 250;
       if (currentBalance < 0) currentBalance = 0;
+
       monthlySpending += Random().nextInt(50) - 25;
       if (monthlySpending < 0) monthlySpending = 0;
     });
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Balance data refreshed!"),
@@ -166,15 +163,91 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // FETCH INSIGHTS
+  // -------------------------------------------------------------------------
+
+  Future<void> _fetchInsights() async {
+    setState(() => _isLoadingInsights = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+          'https://backend-service-647778379452.europe-north1.run.app/recommend/nano',
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        try {
+          final data = json.decode(response.body);
+
+          // STEP 1 – Extract raw_text
+          final rawText = data["gemini_response"]?["raw_text"];
+
+          if (rawText == null) {
+            throw Exception("Missing gemini_response.raw_text");
+          }
+
+          // STEP 2 – Remove ```json … ``` formatting
+          final cleaned =
+              rawText.replaceAll("```json", "").replaceAll("```", "").trim();
+
+          // STEP 3 – Parse the JSON inside raw_text
+          final inner = json.decode(cleaned);
+
+          // STEP 4 – Build the final sentence
+          final title = inner["title"] ?? "Unknown title";
+          final reason = inner["reason"] ?? "No reason provided";
+
+          final newInsight = "We recommend **$title** because $reason";
+
+          // STEP 5 – Update UI
+          setState(() {
+            _insightText = newInsight;
+            _isLoadingInsights = false;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Insights updated!"),
+              duration: Duration(milliseconds: 800),
+              backgroundColor: Colors.green.withOpacity(0.8),
+            ),
+          );
+        } catch (e) {
+          setState(() {
+            _insightText = "Error parsing insight: $e";
+            _isLoadingInsights = false;
+          });
+        }
+      } else {
+        throw Exception("Server error ${response.statusCode}");
+      }
+    } catch (e) {
+      setState(() => _isLoadingInsights = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: ${e.toString()}"),
+          backgroundColor: Colors.red.withOpacity(0.8),
+        ),
+      );
+    }
+  }
+
+  // --------------------------- BUILD UI ------------------------------
+
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
-        // Upper Section: Interactive Header (SliverAppBar)
         SliverAppBar(
           pinned: true,
           expandedHeight: 200.0,
-          backgroundColor: Color(0xFF0D1B2A), // Match body background
+          backgroundColor: Color(0xFF0D1B2A),
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: EdgeInsets.only(left: 24, bottom: 16),
             centerTitle: false,
@@ -191,7 +264,6 @@ class _HomeContentState extends State<HomeContent> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  // Use a deeper variant of accentOrange for the header background
                   colors: [accentOrange.withOpacity(0.9), accentOrange],
                 ),
               ),
@@ -199,10 +271,8 @@ class _HomeContentState extends State<HomeContent> {
                 padding: EdgeInsets.fromLTRB(24, 60, 24, 40),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -223,7 +293,6 @@ class _HomeContentState extends State<HomeContent> {
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.8),
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
                               SizedBox(width: 4),
@@ -246,39 +315,30 @@ class _HomeContentState extends State<HomeContent> {
           actions: [
             IconButton(
               icon: Icon(Icons.settings, color: Colors.white),
-              onPressed: () {
-                // Future implementation: Settings page
-              },
+              onPressed: () {},
             ),
           ],
         ),
 
-        // Middle Content Section (SliverList for scrollability)
+        // Middle Content
         SliverList(
           delegate: SliverChildListDelegate([
-            // Current Balance and Monthly Spending Summary (Single Card)
             Padding(
               padding: EdgeInsets.fromLTRB(16, 20, 16, 16),
               child: _buildBalanceSummaryCard(),
             ),
-
-            // Saving Goals Quick View (Clickable Card to GoalsPage)
             Padding(
               padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: _buildSavingGoalsCard(),
             ),
-
-            // Continue Learning Card (Interactive Progress)
             Padding(
               padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: _buildContinueCard(),
             ),
-
-            // Tip/Suggestion Carousel (Interactive Swipe)
             Padding(
               padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: SizedBox(
-                height: 170, // Fixed height for the carousel
+                height: 170,
                 child: Stack(
                   children: [
                     PageView(
@@ -293,7 +353,7 @@ class _HomeContentState extends State<HomeContent> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(2, (i) {
-                          final bool active = i == _carouselIndex;
+                          bool active = i == _carouselIndex;
                           return AnimatedContainer(
                             duration: Duration(milliseconds: 300),
                             width: active ? 20 : 8,
@@ -321,13 +381,9 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  void _openBudgetCourse() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => BudgetCoursePage()));
-  }
-
-  // --- NEW/UPDATED WIDGETS ---
+  // -------------------------------------------------------------------------
+  // CARD WIDGETS
+  // -------------------------------------------------------------------------
 
   Widget _buildCard({
     required Widget child,
@@ -336,9 +392,7 @@ class _HomeContentState extends State<HomeContent> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(
-          0.15,
-        ), // Slightly less opaque background for contrast
+        color: Colors.grey.withOpacity(0.15),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -463,16 +517,11 @@ class _HomeContentState extends State<HomeContent> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Icon(Icons.star_half, color: primaryBlue, size: 20),
+                Icon(Icons.star_half, color: primaryBlue),
               ],
             ),
             SizedBox(height: 12),
             ...savingGoals.map((g) {
-              final double progress = g['progress'] as double;
-              final Color progressColor = g['color'] as Color;
-              final double target = g['target'] as double;
-              final double saved = g['saved'] as double;
-
               return Padding(
                 padding: EdgeInsets.only(bottom: 12),
                 child: Column(
@@ -482,17 +531,15 @@ class _HomeContentState extends State<HomeContent> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          g['title'] as String,
+                          g['title'],
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          '${((progress) * 100).toStringAsFixed(0)}%',
+                          '${(g['progress'] * 100).toStringAsFixed(0)}%',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 12,
@@ -505,17 +552,15 @@ class _HomeContentState extends State<HomeContent> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
-                        value: progress,
+                        value: g['progress'],
                         minHeight: 8,
                         backgroundColor: Colors.white.withOpacity(0.15),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          progressColor,
-                        ),
+                        valueColor: AlwaysStoppedAnimation<Color>(g['color']),
                       ),
                     ),
                     SizedBox(height: 4),
                     Text(
-                      '€${saved.toStringAsFixed(0)} / €${target.toStringAsFixed(0)}',
+                      '€${g['saved']} / €${g['target']}',
                       style: TextStyle(color: Colors.white54, fontSize: 11),
                     ),
                   ],
@@ -539,15 +584,13 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // Refactored Continue Card
   Widget _buildContinueCard() {
-    final double progress = 0.35; // Example saved progress
+    final double progress = 0.35;
     return GestureDetector(
       onTap: widget.onGoToLearning,
       child: _buildCard(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
               width: 70,
@@ -592,22 +635,23 @@ class _HomeContentState extends State<HomeContent> {
                   Text(
                     'Mini-course on budgeting basics: Module 2',
                     style: TextStyle(color: Colors.white70, fontSize: 13),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
             SizedBox(width: 12),
-            // Use an IconButton for a cleaner look
             IconButton(
-              onPressed: _openBudgetCourse,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BudgetCoursePage()),
+                );
+              },
               icon: Icon(
                 Icons.arrow_forward_ios,
                 color: accentOrange,
                 size: 24,
               ),
-              tooltip: 'Continue Learning',
             ),
           ],
         ),
@@ -615,7 +659,6 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // Refactored Tip Card
   Widget _buildTipCard() {
     return _buildCard(
       padding: EdgeInsets.all(16),
@@ -623,49 +666,40 @@ class _HomeContentState extends State<HomeContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: accentOrange.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.lightbulb_outline,
-                      color: accentOrange,
-                      size: 24,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Text(
-                    'Smart Tip',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: accentOrange.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.lightbulb_outline,
+                  color: accentOrange,
+                  size: 24,
+                ),
               ),
-              Icon(Icons.swipe_left, color: Colors.white54, size: 18),
+              SizedBox(width: 10),
+              Text(
+                'Smart Tip',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           SizedBox(height: 12),
           Text(
-            "You spent too much at restaurants this month. Cut down to improve your 'Europe Trip' goal progress. Eating out budget remaining: €250.",
+            "You spent too much at restaurants this month. Cut down to improve your 'Europe Trip' progress.",
             style: TextStyle(color: Colors.white70, fontSize: 13),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  // Refactored Suggestion Card
   Widget _buildSuggestionCard() {
     return _buildCard(
       padding: EdgeInsets.all(16),
@@ -698,40 +732,41 @@ class _HomeContentState extends State<HomeContent> {
             ],
           ),
           SizedBox(height: 12),
-          Expanded(
-            child: Text(
-              'Your high food spending is impacting your goals. Check out the "Meal Prep 101" course to learn how to cut costs.',
-              style: TextStyle(color: Colors.white70, fontSize: 13),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Integrate with backend system to fetch personalized insights
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Fetching insights from backend..."),
-                    duration: Duration(milliseconds: 1000),
-                    backgroundColor: accentOrange.withOpacity(0.8),
-                  ),
-                );
-              },
-              icon: Icon(Icons.cloud_download, size: 20),
-              label: Text("Get Insights"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: accentOrange,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+
+          _isLoadingInsights
+              ? Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(accentOrange),
                 ),
-                elevation: 0,
-                textStyle: TextStyle(fontWeight: FontWeight.w600),
+              )
+              : Text(
+                _insightText,
+                style: TextStyle(color: Colors.white70, fontSize: 13),
               ),
+
+          SizedBox(height: 12),
+          ElevatedButton.icon(
+            onPressed: _isLoadingInsights ? null : _fetchInsights,
+            icon:
+                _isLoadingInsights
+                    ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                    : Icon(Icons.cloud_download, size: 20),
+            label: Text(_isLoadingInsights ? "Loading..." : "Get Insights"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accentOrange,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
             ),
           ),
         ],
