@@ -18,15 +18,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  
-  
+
   // Pages for the bottom tab navigator
   final List<Widget> _pages = [
     HomeContent(), // Separate class for home content
-    CommunityPage(),
+    GoalsPage(),
     ActivityPage(),
     TicketsPage(),
-    BadgesPage()
+    BadgesPage(),
   ];
 
   void _onItemTapped(int index) {
@@ -90,16 +89,28 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   // Demo data for expense categories
   final List<Map<String, dynamic>> categories = [
-    {'name': 'Food', 'amount': 420.0, 'color': Color(0xFF42A5F5)},       // light blue
-    {'name': 'Transport', 'amount': 180.0, 'color': Color(0xFFFFA000)},  // orange
-    {'name': 'Home', 'amount': 950.0, 'color': Color(0xFF1976D2)},       // blue
-    {'name': 'Shopping', 'amount': 260.0, 'color': Color(0xFFFF8F00)},   // dark orange
-    {'name': 'Leisure', 'amount': 140.0, 'color': Color(0xFF64B5F6)},    // light blue
+    {'name': 'Food', 'amount': 420.0, 'color': Color(0xFF42A5F5)}, // light blue
+    {
+      'name': 'Transport',
+      'amount': 180.0,
+      'color': Color(0xFFFFA000),
+    }, // orange
+    {'name': 'Home', 'amount': 950.0, 'color': Color(0xFF1976D2)}, // blue
+    {
+      'name': 'Shopping',
+      'amount': 260.0,
+      'color': Color(0xFFFF8F00),
+    }, // dark orange
+    {
+      'name': 'Leisure',
+      'amount': 140.0,
+      'color': Color(0xFF64B5F6),
+    }, // light blue
   ];
- 
+
   double get totalSpent =>
       categories.fold(0.0, (sum, c) => sum + (c['amount'] as double));
- 
+
   String get totalSpentLabel {
     final value = totalSpent;
     if (value >= 1000) {
@@ -159,7 +170,10 @@ class _HomeContentState extends State<HomeContent> {
                           ),
                           SizedBox(width: 8),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: accentOrange,
                               borderRadius: BorderRadius.circular(8),
@@ -171,7 +185,7 @@ class _HomeContentState extends State<HomeContent> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ],
@@ -181,7 +195,7 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
           ),
- 
+
           // Donut chart
           Padding(
             padding: EdgeInsets.fromLTRB(16, 40, 16, 38),
@@ -195,19 +209,22 @@ class _HomeContentState extends State<HomeContent> {
                       sectionsSpace: 1,
                       centerSpaceRadius: 55,
                       startDegreeOffset: -90,
-                      sections: categories.map((c) {
-                        final double amount = c['amount'] as double;
-                        final double percent =
-                            totalSpent == 0 ? 0 : (amount / totalSpent) * 100;
-                        return PieChartSectionData(
-                          color: c['color'] as Color,
-                          value: amount,
-                          title: '',
-                          radius: 75,
-                          badgeWidget: null,
-                          showTitle: false,
-                        );
-                      }).toList(),
+                      sections:
+                          categories.map((c) {
+                            final double amount = c['amount'] as double;
+                            final double percent =
+                                totalSpent == 0
+                                    ? 0
+                                    : (amount / totalSpent) * 100;
+                            return PieChartSectionData(
+                              color: c['color'] as Color,
+                              value: amount,
+                              title: '',
+                              radius: 75,
+                              badgeWidget: null,
+                              showTitle: false,
+                            );
+                          }).toList(),
                     ),
                     swapAnimationDuration: Duration(milliseconds: 600),
                     swapAnimationCurve: Curves.easeOutCubic,
@@ -215,12 +232,7 @@ class _HomeContentState extends State<HomeContent> {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Total',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                        ),
-                      ),
+                      Text('Total', style: TextStyle(color: Colors.grey[600])),
                       SizedBox(height: 4),
                       Text(
                         totalSpentLabel,
@@ -236,7 +248,7 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
           ),
- 
+
           // Categories list (title removed)
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -291,9 +303,7 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                       title: Text(
                         c['name'] as String,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       subtitle: LinearProgressIndicator(
                         value: totalSpent == 0 ? 0 : amount / totalSpent,
@@ -328,7 +338,7 @@ class _HomeContentState extends State<HomeContent> {
               ),
             ),
           ),
- 
+
           SizedBox(height: 16),
         ],
       ),
