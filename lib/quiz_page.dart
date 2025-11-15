@@ -7,7 +7,7 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   final Color primaryBlue = const Color(0xFF1E88E5);
-  final Color accentOrange = const Color(0xFFFF6D00);
+  final Color accentOrange = const Color(0xFF3A9C9F);
 
   final List<_Question> _questions = const [
     _Question(

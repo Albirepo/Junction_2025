@@ -8,7 +8,7 @@ class LearningPathPage extends StatefulWidget {
 
 class _LearningPathPageState extends State<LearningPathPage> {
   final Color primaryBlue = const Color(0xFF1E88E5);
-  final Color accentOrange = const Color(0xFFFF6D00);
+  final Color accentOrange = const Color(0xFF3A9C9F);
   final Color successGreen = const Color(0xFF4CAF50);
 
   final List<_PathNode> nodes = [

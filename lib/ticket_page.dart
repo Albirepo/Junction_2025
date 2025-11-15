@@ -5,7 +5,7 @@ import 'widgets/avatar_widget.dart'; // keep this file in your project
 
 // Theme & global colors
 final Color primaryBlue = Color(0xFF1E88E5);
-final Color accentOrange = Color(0xFFFF6D00);
+final Color accentOrange = Color(0xFF3A9C9F);
 final Color warningRed = Color(0xFFE53935);
 final Color successGreen = Color(0xFF43A047);
 final String userName = "Sarah";

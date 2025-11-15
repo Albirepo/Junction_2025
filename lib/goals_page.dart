@@ -4,7 +4,7 @@ import 'widgets/avatar_widget.dart';
 
 // --- Theme Colors ---
 final Color primaryBlue = Color(0xFF00468C);
-final Color accentOrange = Color(0xFFF77F00);
+final Color accentOrange = Color(0xFF3A9C9F);
 final Color lightBlue = Color(0xFFE3F2FD);
 final Color softOrange = Color(0xFFFFF3E0);
 final Color successGreen = Color(0xFF4CAF50);

@@ -8,7 +8,7 @@ import 'learning_path_page.dart';
 
 // Global variables (updated theme: blue and orange)
 final Color primaryBlue = Color(0xFF1E88E5);
-final Color accentOrange = Color(0xFFFF6D00);
+final Color accentOrange = Color(0xFF3A9C9F);
 final String userName = "Sarah";
 
 class HomePage extends StatefulWidget {
@@ -99,11 +99,18 @@ class _HomeContentState extends State<HomeContent> {
   // Demo current balance
   final double currentBalance = 12450.00;
   // Small saving goals to show top-right with progress bars
-  final List<Map<String, dynamic>> savingGoals = [
-    {'title': 'Europe Trip', 'progress': 0.35},
-    {'title': 'New Bike', 'progress': 0.6},
-    {'title': 'Emergency Fund', 'progress': 0.15},
-  ];
+  List<Map<String, dynamic>> get savingGoals => [
+        {
+          'title': 'Gaming PC',
+          'progress': 0.35,
+          'color': Color(0xFF6A1B9A), // same purple as GoalsPage
+        },
+        {
+          'title': 'Europe Trip',
+          'progress': 0.60,
+          'color': Color(0xFF0288D1), // same azure as GoalsPage
+        },
+      ];
   // Carousel controller
   final PageController _carouselController = PageController(viewportFraction: 0.9);
   int _carouselIndex = 0;
@@ -223,7 +230,15 @@ class _HomeContentState extends State<HomeContent> {
                             value: (g['progress'] as double),
                             minHeight: 8,
                             backgroundColor: Colors.white.withOpacity(0.25),
-                            valueColor: AlwaysStoppedAnimation<Color>(accentOrange),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              (g['color'] is Color)
+                                  ? (g['color'] as Color)
+                                  : ((g['title'] == 'Gaming PC')
+                                      ? Color(0xFF6A1B9A)
+                                      : (g['title'] == 'Europe Trip'
+                                          ? Color(0xFF0288D1)
+                                          : Color(0xFF5865A5))),
+                            ),
                           ),
                         ),
                       ],
