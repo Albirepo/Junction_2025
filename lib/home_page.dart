@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
-        color: primaryBlue,
+        color: accentOrange,
         notchMargin: 8,
         height: 70, // Bottom bar height
         child: Row(
@@ -74,11 +74,11 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
+        backgroundColor: accentOrange,
         onPressed: () => _onItemTapped(0),
         shape: CircleBorder(),
         elevation: 4,
-        child: Icon(Icons.home, color: primaryBlue, size: 30),
+        child: Icon(Icons.home, color: Colors.white, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
@@ -119,7 +119,7 @@ class _HomeContentState extends State<HomeContent> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [primaryBlue, primaryBlue.withOpacity(0.85)],
+                colors: [accentOrange, accentOrange.withOpacity(0.85)],
               ),
               boxShadow: [
                 BoxShadow(
