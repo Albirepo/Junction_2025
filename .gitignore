@@ -1,1 +1,80 @@
+# Flutter/Dart
+.dart_tool/
+.buildlog/
+.packages
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub/
+*.log
+*.lock
+
+# Build output
+build/
+
+# macOS
+.DS_Store
+
+# iOS
+ios/Flutter/Flutter.podspec
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.xcarchive
+ios/Flutter/FlutterPluginRegistrant/
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+.android/
+*.iml
+.gradle/
+local.properties
+captures/
+output.json
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# Linux (NEW - this was causing your conflicts)
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugin_registrant.h
+linux/flutter/generated_plugins.cmake
+
+# macOS (NEW - this was causing your conflicts)
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/ephemeral/
+
+# Windows (NEW - this was causing your conflicts)
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugins.cmake
+
+# Web
+web/flutter_service_worker.js
+
+# VSCode
+.vscode/
+
+# IntelliJ
+.idea/
+*.iml
+
+# Misc
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Optional: exclude asset previews if needed
+*.DS_Store
+*.log
+
+# Keep pubspec.lock tracked for apps
+!pubspec.lock
+
+#local developer files
 _scratch/
