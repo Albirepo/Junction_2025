@@ -12,9 +12,9 @@ final String userName = "Gaia";
 
 // New main background color (Dark Blue)
 final Color mainDarkBlue = Color(0xFF0D1B2A);
-final Color expenseSectionBackground = mainDarkBlue;
+final Color expenseSectionBackground = Color(0xFF18181A);
 
-class ExpensePage extends StatelessWidget {
+class TicketsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpenseTrackerContent();
@@ -58,38 +58,38 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
   List<Map<String, dynamic>> categories = [
     {
       'name': 'Subscriptions',
-      'amount': 85.0,
+      'amount': 950.0,
       'color': Color(0xFFE53935),
-      'lastMonth': 60.0,
+      'lastMonth': 600.0,
       'icon': Icons.warning_amber_rounded,
       'isAlert': true,
     },
     {
       'name': 'Food',
-      'amount': 320.0,
+      'amount': 420.0,
       'color': Color(0xFF42A5F5),
-      'lastMonth': 340.0,
+      'lastMonth': 380.0,
       'icon': Icons.restaurant,
     },
     {
       'name': 'Transport',
-      'amount': 70.0,
+      'amount': 180.0,
       'color': Color(0xFFFFA000),
-      'lastMonth': 70.0,
+      'lastMonth': 150.0,
       'icon': Icons.directions_car,
     },
     {
       'name': 'Shopping',
-      'amount': 180.0,
-      'color': Color(0xFF7E57C2),
-      'lastMonth': 150.0,
+      'amount': 260.0,
+      'color': Color(0xFFFF8F00),
+      'lastMonth': 280.0,
       'icon': Icons.shopping_bag,
     },
     {
       'name': 'Leisure',
-      'amount': 120.0,
-      'color': Color(0xFFEC407A),
-      'lastMonth': 100.0,
+      'amount': 140.0,
+      'color': Color(0xFF64B5F6),
+      'lastMonth': 160.0,
       'icon': Icons.sports_esports,
     },
   ];
@@ -136,61 +136,6 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
     _chartAnimationController.dispose();
     _pulseController.dispose();
     super.dispose();
-  }
-
-  void _openAddExpense() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: mainDarkBlue,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.add, color: Colors.white70),
-                  SizedBox(width: 8),
-                  Text(
-                    'Add Expense',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Quick add coming soon.',
-                style: TextStyle(color: Colors.white70),
-              ),
-              SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accentOrange,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text('Close'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   double get totalSpent =>
@@ -254,29 +199,9 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Spacer(),
-                        ElevatedButton.icon(
-                          onPressed: _openAddExpense,
-                          icon: Icon(Icons.add, size: 16),
-                          label: Text('Add'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: accentOrange,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            minimumSize: Size(0, 0),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 0,
-                          ),
-                        ),
                       ],
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 32),
                     _buildAnimatedChartWithBalance(),
                   ],
                 ),
@@ -336,7 +261,7 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
       builder: (context, child) {
         // center account balance animation - scale/tint synced with chart animation
         return SizedBox(
-          height: 220,
+          height: 260,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -348,7 +273,7 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
                   child: PieChart(
                     PieChartData(
                       sectionsSpace: 2,
-                      centerSpaceRadius: 64,
+                      centerSpaceRadius: 74,
                       startDegreeOffset: -90,
                       sections:
                           categories.map((c) {
@@ -359,8 +284,8 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
                               color: c['color'] as Color,
                               value: animatedValue,
                               radius:
-                                  50 +
-                                  (_chartAnimation.value * 12), // pop animation
+                                  58 +
+                                  (_chartAnimation.value * 16), // pop animation
                               title: '',
                               showTitle: false,
                             );
@@ -374,8 +299,8 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
 
               // Center glass circle with animated account balance
               Container(
-                width: 120,
-                height: 120,
+                width: 150,
+                height: 150,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
@@ -437,7 +362,9 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
     required double change,
   }) {
     // Right-side amount text style
-    final amountText = '-€${amount.toStringAsFixed(2)}';
+    final amountText =
+        (amount >= 0 ? '+€' : '-€') + amount.abs().toStringAsFixed(2);
+    final amountColor = amount >= 0 ? successGreen : warningRed;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -451,14 +378,17 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [color.withOpacity(0.14), Colors.transparent],
+                colors: [
+                  Colors.white.withOpacity(0.02),
+                  Colors.white.withOpacity(0.01),
+                ],
               ),
-              color: color.withOpacity(0.06),
+              color: Colors.white.withOpacity(0.03),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: color.withOpacity(0.25)),
+              border: Border.all(color: Colors.white.withOpacity(0.06)),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.18),
+                  color: Colors.black.withOpacity(0.45),
                   blurRadius: 18,
                   offset: Offset(0, 8),
                 ),
@@ -574,7 +504,7 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
                     Text(
                       amountText,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: amount >= 0 ? successGreen : warningRed,
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                       ),

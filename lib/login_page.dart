@@ -1,53 +1,5 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
-import 'dart:math'; // For sin function and random numbers
-
-// Helper class for a single falling cash particle
-class CashParticle {
-  late Offset position;
-  late double size;
-  late Color color;
-  late double opacity;
-  late double speed; // Vertical fall speed
-  late double rotation; // For rotation effect
-  late double rotationSpeed; // How fast it rotates
-
-  CashParticle(Random random, Size areaSize) {
-    position = Offset(
-      random.nextDouble() * areaSize.width, // Random X within the title area
-      -random.nextDouble() * 50, // Start just above the title
-    );
-    size = random.nextDouble() * 15 + 10; // Size between 10 and 25
-    color =
-        Color.lerp(
-          Colors.greenAccent[400],
-          Colors.green[700],
-          random.nextDouble(),
-        )!; // Green shades for money
-    opacity = random.nextDouble() * 0.5 + 0.5; // Opacity between 0.5 and 1.0
-    speed = random.nextDouble() * 2 + 1; // Speed between 1 and 3
-    rotation = random.nextDouble() * pi * 2; // Initial random rotation
-    rotationSpeed =
-        random.nextDouble() * 0.1 - 0.05; // Rotate left or right slowly
-  }
-
-  void update(double deltaTime, Size areaSize) {
-    position = Offset(
-      position.dx,
-      position.dy + speed * deltaTime * 60,
-    ); // Adjust fall speed
-    rotation += rotationSpeed * deltaTime * 60; // Adjust rotation speed
-    // Fade out as it approaches the bottom of the title area
-    if (position.dy > areaSize.height * 0.7) {
-      opacity = (areaSize.height - position.dy) / (areaSize.height * 0.3);
-      if (opacity < 0) opacity = 0;
-    }
-  }
-
-  bool isOffscreen(Size areaSize) {
-    return position.dy > areaSize.height + size; // Off screen at the bottom
-  }
-}
 
 class LoginPage extends StatefulWidget {
   @override
@@ -55,106 +7,66 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isEmailFocused = false;
+  bool _isPasswordFocused = false;
 
-  // --- Animation Variables for Cash Wave (existing) ---
-  late AnimationController _waveController;
+  // Animation Controllers
+  late AnimationController _logoController;
+  late AnimationController _fadeController;
+  late Animation<double> _logoScaleAnimation;
+  late Animation<double> _fadeAnimation;
 
-  // --- Animation Variables for Cash Rain ---
-  late AnimationController _cashRainController;
-  final List<CashParticle> _cashParticles = [];
-  final Random _random = Random();
-  GlobalKey _titleAreaKey = GlobalKey(); // Key to get the title area size
-
-  // --- Theme Colors ---
-  final Color primaryDark = Color(0xFF121212); // Deep Black/Dark Grey
-  final Color accentRed = Color(0xFFE53935); // Sharp Red
-  final Color accentYellow = Color(0xFFFDD835); // Bright Yellow
-  final String appTitle = 'SpareWise';
-
-  // List of characters for the wave animation
-  late List<String> titleChars;
+  // Theme Colors
+  final Color backgroundBlue = Color(0xFF0D1B2A);
+  final Color accent = Color(0xFF3A9C9F);
+  final String appTitle = 'Habitize';
 
   @override
   void initState() {
     super.initState();
 
-    titleChars = appTitle.split('');
-
-    _waveController = AnimationController(
+    _logoController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 2000),
-    )..repeat();
-
-    // --- Initialize Cash Rain Controller ---
-    _cashRainController = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 4), // Cash rain lasts for 4 seconds
+      duration: Duration(milliseconds: 1200),
     );
 
-    _cashRainController.addListener(() {
-      if (_cashRainController.isAnimating) {
-        // Generate new particles continuously while animating
-        _generateCashParticles();
-        // Update existing particles
-        _updateCashParticles();
-      }
-      setState(() {}); // Rebuild to show particles
+    _logoScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
+    );
+
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 800),
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+
+    _logoController.forward();
+    Future.delayed(Duration(milliseconds: 400), () {
+      _fadeController.forward();
     });
-
-    _cashRainController.forward(); // Start the cash rain animation
-  }
-
-  void _generateCashParticles() {
-    RenderBox? renderBox =
-        _titleAreaKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-    Size titleAreaSize = renderBox.size;
-
-    // Generate a few particles per frame to create a dense rain effect
-    for (int i = 0; i < 2; i++) {
-      // Generate 2 particles per frame update
-      _cashParticles.add(CashParticle(_random, titleAreaSize));
-    }
-  }
-
-  void _updateCashParticles() {
-    RenderBox? renderBox =
-        _titleAreaKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-    Size titleAreaSize = renderBox.size;
-
-    List<CashParticle> toRemove = [];
-    for (var particle in _cashParticles) {
-      particle.update(
-        0.016,
-        titleAreaSize,
-      ); // Assuming 60fps, 1/60 = 0.016s per frame
-      if (particle.isOffscreen(titleAreaSize) || particle.opacity <= 0) {
-        toRemove.add(particle);
-      }
-    }
-    for (var particle in toRemove) {
-      _cashParticles.remove(particle);
-    }
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
-    _waveController.dispose();
-    _cashRainController.dispose(); // Dispose the cash rain controller
+    _logoController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
   void _attemptLogin() {
-    String username = _usernameController.text;
+    String email = _emailController.text;
     String password = _passwordController.text;
 
-    if (username.isNotEmpty && password.isNotEmpty) {
+    if (email.isNotEmpty && password.isNotEmpty) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
@@ -164,258 +76,436 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         context: context,
         builder:
             (context) => AlertDialog(
-              title: Text(
-                'Authentication Required',
-                style: TextStyle(color: accentRed),
+              backgroundColor: Color(0xFF1B2838),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: accent, size: 28),
+                  SizedBox(width: 12),
+                  Text(
+                    'Required',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
               content: Text(
-                'Please enter both username and password to proceed.',
+                'Please enter both email and password.',
+                style: TextStyle(color: Colors.white70),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('OK', style: TextStyle(color: accentRed)),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text('OK', style: TextStyle(color: Colors.white)),
+                  ),
                 ),
               ],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
             ),
       );
     }
   }
 
-  // Custom TextField builder for cleaner dark theme code
   Widget _buildTextField({
     required TextEditingController controller,
     required String labelText,
+    required String hintText,
     required IconData icon,
     required bool isObscure,
+    required bool isFocused,
+    required Function(bool) onFocusChange,
     Widget? suffixIcon,
   }) {
-    return TextField(
-      controller: controller,
-      obscureText: isObscure,
-      style: TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: labelText,
-        labelStyle: TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: accentYellow),
-        suffixIcon: suffixIcon,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white10, width: 1.5),
+    return Focus(
+      onFocusChange: onFocusChange,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow:
+              isFocused
+                  ? [
+                    BoxShadow(
+                      color: accent.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: Offset(0, 8),
+                    ),
+                  ]
+                  : [],
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: accentRed, width: 2.0),
+        child: TextField(
+          controller: controller,
+          obscureText: isObscure,
+          style: TextStyle(color: Colors.white, fontSize: 16),
+          decoration: InputDecoration(
+            labelText: labelText,
+            hintText: hintText,
+            hintStyle: TextStyle(color: Colors.white38, fontSize: 14),
+            labelStyle: TextStyle(
+              color: isFocused ? accent : Colors.white54,
+              fontSize: 14,
+              fontWeight: isFocused ? FontWeight.w600 : FontWeight.normal,
+            ),
+            prefixIcon: AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              child: Icon(
+                icon,
+                color: isFocused ? accent : Colors.white54,
+                size: 22,
+              ),
+            ),
+            suffixIcon: suffixIcon,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: Colors.white.withOpacity(0.1),
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: accent, width: 2.5),
+            ),
+            filled: true,
+            fillColor:
+                isFocused
+                    ? Colors.white.withOpacity(0.12)
+                    : Colors.white.withOpacity(0.06),
+            contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+          ),
         ),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.05),
-        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       ),
     );
   }
 
-  // Animated Cash Wave Title (existing)
-  Widget _buildAnimatedCashWaveTitle() {
-    const double waveAmplitude = 1.6;
-    const double waveFrequency = 0.5;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(titleChars.length, (index) {
-        double offset = index * waveFrequency;
-
-        return AnimatedBuilder(
-          animation: _waveController,
-          builder: (context, child) {
-            double sineValue = sin((_waveController.value * 2 * pi) + offset);
-            double translateY = sineValue * waveAmplitude;
-
-            return Transform.translate(
-              offset: Offset(0, translateY),
-              child: Text(
-                titleChars[index],
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.w900,
-                  color: accentRed,
-                  letterSpacing: 2.0,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 10.0,
-                      color: accentYellow.withOpacity(0.5),
-                      offset: Offset(0, 0),
-                    ),
-                  ],
+  Widget _buildLogo() {
+    return ScaleTransition(
+      scale: _logoScaleAnimation,
+      child: Column(
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withOpacity(0.3),
+                  blurRadius: 30,
+                  spreadRadius: 5,
                 ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: Image.network(
+                'assets/logo.jpg',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [accent, accent.withOpacity(0.7)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_wallet,
+                      size: 60,
+                      color: Colors.white,
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        );
-      }),
+            ),
+          ),
+          SizedBox(height: 20),
+          Text(
+            appTitle,
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              letterSpacing: 1.2,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Build Better Habits',
+            style: TextStyle(
+              fontSize: 14,
+              color: accent,
+              letterSpacing: 0.8,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryDark,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(height: 80),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [backgroundBlue, Color(0xFF1B2838), backgroundBlue],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 40),
 
-                // --- Stack for Cash Wave Title + Cash Rain Effect ---
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Base: Cash Wave Title
-                    Container(
-                      key: _titleAreaKey, // Attach key to measure this area
-                      width:
-                          double
-                              .infinity, // Ensure it takes full width for particle generation
-                      height: 80, // Approximate height of the title text
-                      child: _buildAnimatedCashWaveTitle(),
-                    ),
+                  // Logo and App Name
+                  _buildLogo(),
 
-                    // Overlay: Cash Rain Particles (only visible while cashRainController is animating)
-                    ..._cashParticles.map((particle) {
-                      return Positioned(
-                        left: particle.position.dx,
-                        top: particle.position.dy,
-                        child: Opacity(
-                          opacity: particle.opacity,
-                          child: Transform.rotate(
-                            angle: particle.rotation,
-                            child: Icon(
-                              _random.nextBool()
-                                  ? Icons.attach_money
-                                  : Icons.euro_symbol, // Random dollar or euro
-                              size: particle.size,
-                              color: particle.color,
+                  SizedBox(height: 60),
+
+                  // Form
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Column(
+                      children: [
+                        // Email Field
+                        _buildTextField(
+                          controller: _emailController,
+                          labelText: 'Email',
+                          hintText: 'Enter your email',
+                          icon: Icons.email_outlined,
+                          isObscure: false,
+                          isFocused: _isEmailFocused,
+                          onFocusChange: (focused) {
+                            setState(() {
+                              _isEmailFocused = focused;
+                            });
+                          },
+                        ),
+
+                        SizedBox(height: 20),
+
+                        // Password Field
+                        _buildTextField(
+                          controller: _passwordController,
+                          labelText: 'Password',
+                          hintText: 'Enter your password',
+                          icon: Icons.lock_outline,
+                          isObscure: !_isPasswordVisible,
+                          isFocused: _isPasswordFocused,
+                          onFocusChange: (focused) {
+                            setState(() {
+                              _isPasswordFocused = focused;
+                            });
+                          },
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility_rounded
+                                  : Icons.visibility_off_rounded,
+                              color:
+                                  _isPasswordFocused ? accent : Colors.white54,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
+                        ),
+
+                        SizedBox(height: 16),
+
+                        // Forgot Password
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {},
+                            child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: accent,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ],
-                ),
 
-                SizedBox(height: 10),
+                        SizedBox(height: 32),
 
-                Text(
-                  'Your Financial Control Center',
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
-                ),
-
-                SizedBox(height: 60),
-
-                _buildTextField(
-                  controller: _usernameController,
-                  labelText: 'Username',
-                  icon: Icons.person_outline,
-                  isObscure: false,
-                ),
-
-                SizedBox(height: 20),
-
-                _buildTextField(
-                  controller: _passwordController,
-                  labelText: 'Password',
-                  icon: Icons.lock_outline,
-                  isObscure: !_isPasswordVisible,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.white54,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
-                  ),
-                ),
-
-                SizedBox(height: 10),
-
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Forgot Password?',
-                      style: TextStyle(
-                        color: accentYellow,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 30),
-
-                Container(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: _attemptLogin,
-                    child: Text(
-                      'LOG IN',
-                      style: TextStyle(
-                        color: primaryDark,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accentRed,
-                      elevation: 8,
-                      shadowColor: accentRed.withOpacity(0.6),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 24),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Need a budget?',
-                      style: TextStyle(color: Colors.white60, fontSize: 14),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        print('Register pressed');
-                      },
-                      child: Text(
-                        'Create Account',
-                        style: TextStyle(
-                          color: accentYellow,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                        // Login Button
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: _attemptLogin,
+                            child: AnimatedContainer(
+                              duration: Duration(milliseconds: 200),
+                              width: double.infinity,
+                              height: 56,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [accent, accent.withOpacity(0.8)],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: accent.withOpacity(0.4),
+                                    blurRadius: 20,
+                                    offset: Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'LOG IN',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2.0,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+
+                        SizedBox(height: 24),
+
+                        // Divider
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: Colors.white.withOpacity(0.2),
+                                thickness: 1,
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                'or',
+                                style: TextStyle(
+                                  color: Colors.white38,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: Colors.white.withOpacity(0.2),
+                                thickness: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 24),
+
+                        // Social Login
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildSocialButton(
+                                Icons.g_mobiledata,
+                                'Google',
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: _buildSocialButton(Icons.apple, 'Apple'),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: 32),
+
+                        // Sign Up Link
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account?",
+                              style: TextStyle(
+                                color: Colors.white60,
+                                fontSize: 14,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                'Sign Up',
+                                style: TextStyle(
+                                  color: accent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+
+                  SizedBox(height: 40),
+                ],
+              ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(IconData icon, String label) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () {
+          print('$label login pressed');
+        },
+        child: Container(
+          height: 52,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.15)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white70, size: 24),
+              SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ),
