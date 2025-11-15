@@ -4,7 +4,7 @@ Habitize helps 15–25 year olds make money visible and build healthy habits usi
 
 ## What problem we solve
 
-1. **Financial visibility** – young users often have only fragments of information across banking apps. Habitize aggregates spending into simple Essentials / Wants / Savings buckets, highlights impulse patterns, and shows progress toward their goals in a friendly dashboard.
+1. **Finance visibility** – young users often have only fragments of information across banking apps. Habitize aggregates spending into simple Essentials / Wants / Savings buckets and shows progress toward their goals in a friendly dashboard. We designed a system that with the help of the friendly AI highlight the worrying signs, like possible impulse spending and reccomend specific articles and learning paths to help the user to overcome those.
 2. **Skill building** – financial literacy content is scattered or long-form. We deliver nano lessons, full articles, and interactive quests tuned to each user’s needs so learning fits in real life.
 
 ## Key features
@@ -17,14 +17,14 @@ Habitize helps 15–25 year olds make money visible and build healthy habits usi
 - **AI-guided learning**
   - Firestore hosts nano lessons, articles, and future video snippets curated from Finnish financial literacy research.
   - Gemini 2.5 Flash recommends the best next nano lesson (and later, learning paths, challenges, and articles) based on the user’s profile and behavior.
-  - Push-friendly “nano learning” tips plus full-length articles and structured learning paths (planned) to support deeper mastery.
+  - Push-friendly “nano learning” tips plus full-length articles and structured learning paths to support deeper mastery.
 
-- **Gamified journeys (planned)**
+- **Gamified journeys**
   - Daily streak system and seasonal challenges.
   - Monthly competition leaderboard for classrooms or friend groups.
   - Optional TikTok-style video nuggets to keep the tone fun and relatable.
 
-- **Sandbox simulator (design ready)**
+- **Sandbox simulator**
   - Single-screen layout with collapsible blocks so users can tweak income, rent, category budgets, and savings goals on the fly.
   - Instant feedback on “time to goal,” disposable cash, and trade-offs.
   - Designed to be inclusive by default: simple sliders, always-visible summary HUD, no hidden menus.
