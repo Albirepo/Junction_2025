@@ -119,8 +119,7 @@ class _HomeContentState extends State<HomeContent> {
   double spendingLimit = 2500.00;
 
   bool _isLoadingInsights = false;
-  String _insightText =
-      'Your high food spending is impacting your goals. Check out the "Meal Prep 101" course to learn how to cut costs.';
+  String _insightText = '';
 
   List<Map<String, dynamic>> get savingGoals => [
     {
@@ -651,12 +650,12 @@ class _HomeContentState extends State<HomeContent> {
               Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: primaryBlue.withOpacity(0.15),
+                  color: accentOrange.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   Icons.school_outlined,
-                  color: primaryBlue,
+                  color: accentOrange,
                   size: 24,
                 ),
               ),
