@@ -62,6 +62,7 @@ flutter:
     - assets/avatar_profile.png
     - assets/img_samir.png
     - assets/gaia.png
+    - docs/sample_content.json
     - assets/Dimitrii.jpg
     - assets/Anastasiia.jpg
     - assets/Robert.jpg

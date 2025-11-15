@@ -10,6 +10,7 @@ import 'budget_course_page.dart';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 // Global variables (updated theme: blue and orange)
 final Color primaryBlue = Color(0xFF1E88E5);
@@ -122,6 +123,161 @@ class _HomeContentState extends State<HomeContent> {
   String _insightText = '';
   String _insightTitleClean = '';
   String _insightReason = '';
+
+  Future<void> _openInsightDetails() async {
+    try {
+      // Hardcoded content as requested
+      final String title = _insightTitleClean.isNotEmpty
+          ? _insightTitleClean
+          : 'Subscriptions = yearly cost';
+      final String content =
+          'Multiply each monthly subscription by 12 to see the yearly cost. Five 9.99€ subs is nearly 600€ per yea';
+      final int eta = 35;
+
+      await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Color(0xFF0D1B2A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (ctx) {
+          return DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.75,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (_, controller) {
+              return Padding(
+                padding: EdgeInsets.fromLTRB(16, 12, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          icon: Icon(Icons.close, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'estimated reading time $eta',
+                      style: TextStyle(color: Colors.white60, fontSize: 12),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Monthly fees hide the true impact.',
+                      style: TextStyle(color: Colors.white70, fontStyle: FontStyle.italic),
+                    ),
+                    SizedBox(height: 10),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: controller,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              content,
+                              style: TextStyle(color: Colors.white, height: 1.4, fontSize: 15),
+                            ),
+                            SizedBox(height: 14),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: accentOrange.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: accentOrange.withOpacity(0.5)),
+                                  ),
+                                  child: Text(
+                                    '#subscriptions',
+                                    style: TextStyle(
+                                      color: accentOrange,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: accentOrange.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: accentOrange.withOpacity(0.5)),
+                                  ),
+                                  child: Text(
+                                    '#budgeting',
+                                    style: TextStyle(
+                                      color: accentOrange,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      // Silent fail: show minimal fallback
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Color(0xFF0D1B2A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (_) => Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _insightTitleClean.isNotEmpty ? _insightTitleClean : 'Details',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  IconButton(onPressed: () => Navigator.of(context).pop(), icon: Icon(Icons.close, color: Colors.white70)),
+                ],
+              ),
+              SizedBox(height: 8),
+              Text('Unable to load additional content.', style: TextStyle(color: Colors.white70)),
+              SizedBox(height: 8),
+            ],
+          ),
+        ),
+      );
+    }
+  }
 
   List<Map<String, dynamic>> get savingGoals => [
     {
@@ -727,19 +883,39 @@ class _HomeContentState extends State<HomeContent> {
                     : SizedBox.shrink()),
           ),
           SizedBox(height: 8),
-          ElevatedButton.icon(
-            onPressed: _isLoadingInsights ? null : _fetchInsights,
-            icon: Icon(Icons.cloud_download, size: 20),
-            label: Text(_isLoadingInsights ? "Loading..." : "Get Insights"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: accentOrange,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: _isLoadingInsights ? null : _fetchInsights,
+                icon: Icon(Icons.cloud_download, size: 20),
+                label: Text(_isLoadingInsights ? "Loading..." : "Get Insights"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentOrange,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
               ),
-              elevation: 0,
-            ),
+              SizedBox(width: 8),
+              if (!_isLoadingInsights && _insightTitleClean.isNotEmpty)
+                ElevatedButton(
+                  onPressed: _openInsightDetails,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentOrange,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
+                    textStyle: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  child: Text('Learn more'),
+                ),
+            ],
           ),
         ],
       ),
