@@ -203,7 +203,17 @@ class _HomeContentState extends State<HomeContent> {
           final title = inner["title"] ?? "Unknown title";
           final reason = inner["reason"] ?? "No reason provided";
 
-          final newInsight = "We recommend **$title** because $reason";
+          final cleanTitle = title.toString().replaceAll("*", "").trim();
+          final rawReason = reason.toString().trim();
+          final loweredReason = rawReason.isEmpty
+              ? "it fits your learning profile."
+              : rawReason[0].toLowerCase() + rawReason.substring(1);
+          final formattedReason = loweredReason.endsWith(".")
+              ? loweredReason
+              : "$loweredReason.";
+
+          final newInsight =
+              "We recommend $cleanTitle because $formattedReason";
 
           // STEP 5 – Update UI
           setState(() {
