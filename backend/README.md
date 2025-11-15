@@ -30,3 +30,9 @@ uvicorn main:app --reload --port 8000
  
   { "answer": "Gemini response text" }
 
+# When the model is run in Google Cloud
+# https://backend-service-647778379452.europe-north1.run.app
+
+## Sending a request to Gemini
+
+curl -X POST   -F "prompt=What can be a good prompt?" -F "file=@backend/some_data.pdf;type=application/pdf" https://backend-service-647778379452.europe-north1.run.app/analyze
