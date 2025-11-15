@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
               tooltip: 'Activity',
             ),
             IconButton(
-              icon: Icon(Icons.account_balance_wallet, color: Colors.white),
+              icon: Icon(Icons.euro_symbol, color: Colors.white),
               onPressed: () => _onItemTapped(3),
               tooltip: 'Expense',
             ),

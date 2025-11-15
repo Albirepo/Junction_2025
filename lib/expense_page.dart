@@ -52,7 +52,7 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
   late Animation<double> _chartAnimation;
 
   // Dynamic account balance (you can update this variable programmatically)
-  double accountBalance = 14095.0; // default value (dynamic variable)
+  double accountBalance = 705.0; // default value (dynamic variable)
 
   // Demo categories
   List<Map<String, dynamic>> categories = [
@@ -357,8 +357,8 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
 
               // Center glass circle with animated account balance
               Container(
-                width: 120,
-                height: 120,
+                width: 132,
+                height: 132,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
@@ -388,12 +388,13 @@ class _ExpenseTrackerContentState extends State<ExpenseTrackerContent>
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 6),
+                          SizedBox(height: 2),
                           Text(
-                            'Total Balance',
+                            'Monthly spending',
                             style: TextStyle(
-                              color: Colors.grey[700],
+                              color: Colors.grey,
                               fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
